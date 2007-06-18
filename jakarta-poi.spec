@@ -28,28 +28,19 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-%define section   free
-%define base_name poi
-%define gcj_support 1
+%define section         free
+%define base_name       poi
+%define gcj_support     1
 
 Name:           jakarta-%{base_name}
-Version:        2.5.1
-Release:        %mkrel 2.1
+Version:        3.0
+Release:        %mkrel 1
 Epoch:          0
 Summary:        Java API To Access Microsoft Format Files
-
 Group:          Development/Java
 License:        Apache License
 URL:            http://jakarta.apache.org/poi/
-Source0:        poi-src-2.5.1-final-20040804.tar.bz2
-#cvs -d :pserver:anoncvs@cvs.apache.org:/home/cvspublic  login
-#cvs -z3 -d :pserver:anoncvs@cvs.apache.org:/home/cvspublic export -r HEAD jakarta-poi/src/scratchpad
-Source1:	poi-scratchpad-unreleased-src-20050824.tar.bz2
-
-Patch0:         poi-build_xml.patch.bz2
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
-#Distribution:   JPackage
-#Vendor:         JPackage Project
+Source0:        http://www.apache.org/dist/poi/release/src/poi-src-3.0-FINAL-20070503.tar.gz
 %if %{gcj_support}
 Requires(post): java-gcj-compat
 Requires(postun): java-gcj-compat
@@ -57,28 +48,29 @@ BuildRequires:  java-gcj-compat-devel
 %else
 BuildArch:      noarch
 %endif
-BuildRequires:  jpackage-utils >= 0:1.6
+Requires:       jakarta-commons-beanutils >= 0:1.6.1
+Requires:       jakarta-commons-collections >= 0:2.1
+Requires:       jakarta-commons-lang >= 0:2.0
+Requires:       jakarta-commons-logging >= 0:1.0.3
+Requires:       log4j >= 0:1.2.8
+Requires:       xalan-j2 >= 0:2.5.2
+Requires:       xerces-j2 >= 0:2.6.0
 BuildRequires:  ant >= 0:1.6
+BuildRequires:  ant-jdepend >= 0:1.6
 BuildRequires:  ant-junit >= 0:1.6
-BuildRequires:  junit >= 0:3.8.1
 BuildRequires:  ant-trax >= 0:1.6
 BuildRequires:  jaxp_transform_impl
-BuildRequires:  ant-jdepend >= 0:1.6
-BuildRequires:  jdepend >= 0:2.6
 BuildRequires:  jakarta-commons-beanutils >= 0:1.6.1
 BuildRequires:  jakarta-commons-collections >= 0:2.1
 BuildRequires:  jakarta-commons-lang >= 0:2.0
 BuildRequires:  jakarta-commons-logging >= 0:1.0.3
+BuildRequires:  jdepend >= 0:2.6
+BuildRequires:  jpackage-utils >= 0:1.6
+BuildRequires:  junit >= 0:3.8.1
 BuildRequires:  log4j >= 0:1.2.8
 BuildRequires:  xalan-j2 >= 0:2.5.2
 BuildRequires:  xerces-j2 >= 0:2.6.0
-Requires:  jakarta-commons-beanutils >= 0:1.6.1
-Requires:  jakarta-commons-collections >= 0:2.1
-Requires:  jakarta-commons-lang >= 0:2.0
-Requires:  jakarta-commons-logging >= 0:1.0.3
-Requires:  log4j >= 0:1.2.8
-Requires:  xalan-j2 >= 0:2.5.2
-Requires:  xerces-j2 >= 0:2.6.0
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %description
 The POI project consists of APIs for manipulating 
@@ -93,7 +85,6 @@ Document formats and welcome others to participate.
 OLE 2 Compound Document Format based files include 
 most Microsoft Office files such as XLS and DOC as 
 well as MFC serialization API based file formats. 
-
 
 %package        javadoc
 Summary:        Javadoc for %{name}
@@ -111,66 +102,57 @@ Group:          Development/Java
 
 
 %prep
-%setup -c -q -n %{base_name}
-#find . -name "*.jar" -exec rm {} \;
-find . -name "*.jar" -exec mv {} {}.no \;
-gzip -dc %{SOURCE1} | tar xf -
-rm -rf src/scratchpad/src/org/apache/poi/hslf/
-rm -rf src/scratchpad/testcases/org/apache/poi/hslf/
+%setup -q -n %{base_name}-%{version}-rc4
+%{_bindir}/find . -name "*.jar" | %{_bindir}/xargs -t %{__rm}
 
-%patch0 -b .sav
+%{__mv} src/testcases/org/apache/poi/hpsf/basic/TestMetaDataIPI.java src/testcases/org/apache/poi/hpsf/basic/TestMetaDataIPI.java.orig
+%{_bindir}/iconv -t utf8 -c src/testcases/org/apache/poi/hpsf/basic/TestMetaDataIPI.java.orig -o src/testcases/org/apache/poi/hpsf/basic/TestMetaDataIPI.java
+
+%{__perl} -pi -e 's/<javac/<javac nowarn="true"/g' build.xml
+%{__perl} -pi -e 's/fork="no"/fork="yes"/g' build.xml
 
 %build
 export OPT_JAR_LIST="ant/ant-junit junit ant/ant-jdepend jdepend jaxp_transform_impl ant/ant-trax"
-export CLASSPATH=$(build-classpath \
-commons-beanutils \
-commons-collections \
-commons-lang \
-commons-logging \
-log4j \
-xalan-j2 \
-xerces-j2)
+export CLASSPATH=$(build-classpath commons-beanutils commons-collections commons-lang commons-logging log4j xalan-j2 xerces-j2)
 export ANT_OPTS="-Xmx256m -Djava.awt.headless=true -Dbuild.sysclasspath=first -Ddisconnected=true"
 # FIXME: can't run the tests because java still wants X
-%ant jar #test
+%{ant} jar #test
 
 %install
-rm -rf $RPM_BUILD_ROOT
+%{__rm} -rf %{buildroot}
 
-install -dm 755 $RPM_BUILD_ROOT%{_javadir}
-cp -p build/dist/%{base_name}-%{version}-final-*.jar \
-  $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
-cp -p build/dist/%{base_name}-contrib-%{version}-final-*.jar \
-  $RPM_BUILD_ROOT%{_javadir}/%{name}-contrib-%{version}.jar
-cp -p build/dist/%{base_name}-scratchpad-%{version}-final-*.jar \
-  $RPM_BUILD_ROOT%{_javadir}/%{name}-scratchpad-%{version}.jar
-(cd $RPM_BUILD_ROOT%{_javadir} && for jar in %{name}*-%{version}.jar; do ln -sf ${jar} `echo $jar| sed "s|jakarta-||g"`; done)
-(cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} `echo $jar| sed "s|-%{version}||g"`; done)
+%{__mkdir_p} %{buildroot}%{_javadir}
+
+%{__cp} -a build/dist/%{base_name}-%{version}-*.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
+%{__cp} -a build/dist/%{base_name}-contrib-%{version}-*.jar %{buildroot}%{_javadir}/%{name}-contrib-%{version}.jar
+%{__cp} -a build/dist/%{base_name}-scratchpad-%{version}-*.jar %{buildroot}%{_javadir}/%{name}-scratchpad-%{version}.jar
+
+(cd %{buildroot}%{_javadir} && for jar in %{name}*-%{version}.jar; do %{__ln_s} ${jar} `echo $jar| sed "s|jakarta-||g"`; done)
+(cd %{buildroot}%{_javadir} && for jar in *-%{version}.jar; do %{__ln_s} ${jar} `echo $jar| sed "s|-%{version}||g"`; done)
 
 #javadoc
-install -dm 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -pr docs/apidocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name} # ghost symlink
-rm -rf docs/apidocs
+%{__mkdir_p} %{buildroot}%{_javadocdir}/%{name}-%{version}
+%{__cp} -a docs/apidocs/* %{buildroot}%{_javadocdir}/%{name}-%{version}
+%{__ln_s} %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
+%{__rm} -rf docs/apidocs
 
 #manual
-install -dm 755 $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
-cp -pr docs/* $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
-cp -p LICENSE $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
-ln -s %{_javadocdir}/%{name}-%{version} $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}/apidocs # ghost symlink
+%{__mkdir_p} %{buildroot}%{_docdir}/%{name}-%{version}
+%{__cp} -a docs/* %{buildroot}%{_docdir}/%{name}-%{version}
+%{__cp} -a LICENSE %{buildroot}%{_docdir}/%{name}-%{version}
+%{__ln_s} %{_javadocdir}/%{name}-%{version} %{buildroot}%{_docdir}/%{name}-%{version}/apidocs # ghost symlink
 
 %{__perl} -pi -e 's|\r$||g' \
-  `find $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version} -type f \
-  -name "*.css" -o -name "*.html" -o -name "*.js" \
-  -o -name "*.rss" -o -name "*.txt" -o -name "*.xml"` \
-  $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}/LICENSE
+  `%{_bindir}/find %{buildroot}%{_docdir}/%{name}-%{version} -type f \
+  -name "*.css" -o -name "*.html" -o -name "*.js" -o -name "*.rss" -o -name "*.txt" -o -name "*.xml"` \
+  %{buildroot}%{_docdir}/%{name}-%{version}/LICENSE
 
 %if %{gcj_support}
 %{_bindir}/aot-compile-rpm
 %endif
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+%{__rm} -rf %{buildroot}
 
 %if %{gcj_support}
 %post
@@ -180,24 +162,19 @@ rm -rf $RPM_BUILD_ROOT
 %{clean_gcjdb}
 %endif
 
-%post javadoc
-rm -f %{_javadocdir}/%{name}
-ln -s %{name}-%{version} %{_javadocdir}/%{name}
-
-
 %files
 %defattr(0644,root,root,0755)
 %doc %{_docdir}/%{name}-%{version}/LICENSE
 %{_javadir}/*.jar
 %if %{gcj_support}
 %dir %{_libdir}/gcj/%{name}
-%{_libdir}/gcj/%{name}/*
+%attr(-,root,root) %{_libdir}/gcj/%{name}/*
 %endif
 
 %files javadoc
 %defattr(0644,root,root,0755)
 %doc %{_javadocdir}/%{name}-%{version}
-%ghost %doc %{_javadocdir}/%{name}
+%doc %{_javadocdir}/%{name}
 
 %files manual
 %defattr(0644,root,root,0755)
