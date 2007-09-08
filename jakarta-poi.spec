@@ -34,7 +34,7 @@
 
 Name:           jakarta-%{base_name}
 Version:        3.0
-Release:        %mkrel 1
+Release:        %mkrel 2
 Epoch:          0
 Summary:        Java API To Access Microsoft Format Files
 Group:          Development/Java
