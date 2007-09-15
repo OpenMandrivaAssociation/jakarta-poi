@@ -34,7 +34,7 @@
 
 Name:           jakarta-%{base_name}
 Version:        3.0
-Release:        %mkrel 2
+Release:        %mkrel 3
 Epoch:          0
 Summary:        Java API To Access Microsoft Format Files
 Group:          Development/Java
@@ -42,8 +42,6 @@ License:        Apache License
 URL:            http://jakarta.apache.org/poi/
 Source0:        http://www.apache.org/dist/poi/release/src/poi-src-3.0-FINAL-20070503.tar.gz
 %if %{gcj_support}
-Requires(post): java-gcj-compat
-Requires(postun): java-gcj-compat
 BuildRequires:  java-gcj-compat-devel
 %else
 BuildArch:      noarch
