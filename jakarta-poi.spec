@@ -34,7 +34,7 @@
 
 Name:           jakarta-%{base_name}
 Version:        3.0
-Release:        %mkrel 3
+Release:        %mkrel 4
 Epoch:          0
 Summary:        Java API To Access Microsoft Format Files
 Group:          Development/Java
@@ -63,7 +63,7 @@ BuildRequires:  jakarta-commons-collections >= 0:2.1
 BuildRequires:  jakarta-commons-lang >= 0:2.0
 BuildRequires:  jakarta-commons-logging >= 0:1.0.3
 BuildRequires:  jdepend >= 0:2.6
-BuildRequires:  jpackage-utils >= 0:1.6
+BuildRequires:  java-rpmbuild >= 0:1.6
 BuildRequires:  junit >= 0:3.8.1
 BuildRequires:  log4j >= 0:1.2.8
 BuildRequires:  xalan-j2 >= 0:2.5.2
