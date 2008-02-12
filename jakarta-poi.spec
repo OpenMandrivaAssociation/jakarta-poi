@@ -33,14 +33,14 @@
 %define gcj_support     1
 
 Name:           jakarta-%{base_name}
-Version:        3.0
-Release:        %mkrel 4
+Version:        3.0.2
+Release:        %mkrel 0.0.1
 Epoch:          0
 Summary:        Java API To Access Microsoft Format Files
 Group:          Development/Java
 License:        Apache License
 URL:            http://jakarta.apache.org/poi/
-Source0:        http://www.apache.org/dist/poi/release/src/poi-src-3.0-FINAL-20070503.tar.gz
+Source0:        http://www.apache.org/dist/poi/release/src/poi-src-3.0.2-FINAL-20080204.tar.gz
 %if %{gcj_support}
 BuildRequires:  java-gcj-compat-devel
 %else
@@ -99,8 +99,8 @@ Group:          Development/Java
 
 
 %prep
-%setup -q -n %{base_name}-%{version}-rc4
-%{_bindir}/find . -name "*.jar" | %{_bindir}/xargs -t %{__rm}
+%setup -q -n %{base_name}-%{version}-FINAL
+%remove_java_binaries
 
 %{__mv} src/testcases/org/apache/poi/hpsf/basic/TestMetaDataIPI.java src/testcases/org/apache/poi/hpsf/basic/TestMetaDataIPI.java.orig
 %{_bindir}/iconv -t utf8 -c src/testcases/org/apache/poi/hpsf/basic/TestMetaDataIPI.java.orig -o src/testcases/org/apache/poi/hpsf/basic/TestMetaDataIPI.java
