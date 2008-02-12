@@ -68,6 +68,7 @@ BuildRequires:  junit >= 0:3.8.1
 BuildRequires:  log4j >= 0:1.2.8
 BuildRequires:  xalan-j2 >= 0:2.5.2
 BuildRequires:  xerces-j2 >= 0:2.6.0
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
 The POI project consists of APIs for manipulating 
