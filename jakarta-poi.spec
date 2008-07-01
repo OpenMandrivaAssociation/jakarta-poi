@@ -30,17 +30,17 @@
 
 %define section         free
 %define base_name       poi
-%define gcj_support     1
+%define gcj_support     0
 
 Name:           jakarta-%{base_name}
-Version:        3.0.2
+Version:        3.1
 Release:        %mkrel 0.0.1
 Epoch:          0
 Summary:        Java API To Access Microsoft Format Files
 Group:          Development/Java
 License:        Apache License
 URL:            http://jakarta.apache.org/poi/
-Source0:        http://www.apache.org/dist/poi/release/src/poi-src-3.0.2-FINAL-20080204.tar.gz
+Source0:        http://www.apache.org/dist/poi/release/src/poi-src-3.1-FINAL-20080629.tar.gz
 %if %{gcj_support}
 BuildRequires:  java-gcj-compat-devel
 %else
@@ -145,9 +145,7 @@ export ANT_OPTS="-Xmx256m -Djava.awt.headless=true -Dbuild.sysclasspath=first -D
   -name "*.css" -o -name "*.html" -o -name "*.js" -o -name "*.rss" -o -name "*.txt" -o -name "*.xml"` \
   %{buildroot}%{_docdir}/%{name}-%{version}/LICENSE
 
-%if %{gcj_support}
-%{_bindir}/aot-compile-rpm
-%endif
+%{gcj_compile}
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -164,10 +162,7 @@ export ANT_OPTS="-Xmx256m -Djava.awt.headless=true -Dbuild.sysclasspath=first -D
 %defattr(0644,root,root,0755)
 %doc %{_docdir}/%{name}-%{version}/LICENSE
 %{_javadir}/*.jar
-%if %{gcj_support}
-%dir %{_libdir}/gcj/%{name}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/*
-%endif
+%{gcj_files}
 
 %files javadoc
 %defattr(0644,root,root,0755)
